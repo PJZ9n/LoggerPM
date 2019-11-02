@@ -53,7 +53,7 @@
         
         public function __destruct()
         {
-            //not use
+            $this->sqlite3->close();
         }
     
         public function getFilePath(): string

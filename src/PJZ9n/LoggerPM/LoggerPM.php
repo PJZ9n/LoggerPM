@@ -33,7 +33,11 @@
     namespace PJZ9n\LoggerPM;
     
     use pocketmine\plugin\PluginBase;
-    
+
+    /**
+     * Class LoggerPM
+     * @package PJZ9n\LoggerPM
+     */
     class LoggerPM extends PluginBase
     {
         

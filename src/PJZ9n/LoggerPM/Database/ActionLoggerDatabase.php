@@ -36,7 +36,7 @@
 
     /**
      * Class ActionLoggerDatabase
-     * @package PJZ9n\LoggerPM\Library\Database
+     * @package PJZ9n\LoggerPM\Database
      */
     class ActionLoggerDatabase extends SqliteDatabase
     {

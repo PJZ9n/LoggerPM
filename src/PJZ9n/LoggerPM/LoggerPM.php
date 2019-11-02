@@ -67,11 +67,6 @@
             $this->initCommands();
         }
         
-        public function onDisable(): void
-        {
-            //
-        }
-        
         private function initConfig(): void
         {
             $this->saveDefaultConfig();

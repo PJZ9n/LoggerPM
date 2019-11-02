@@ -34,7 +34,11 @@
     
     use PJZ9n\LoggerPM\Library\Database\Database;
     use pocketmine\utils\Config;
-    
+
+    /**
+     * Class YamlDatabase
+     * @package PJZ9n\LoggerPM\Library\Database\Type
+     */
     abstract class YamlDatabase extends Config implements Database
     {
         

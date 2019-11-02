@@ -34,7 +34,11 @@
     
     use PJZ9n\LoggerPM\Library\Database\Database;
     use SQLite3;
-    
+
+    /**
+     * Class SqliteDatabase
+     * @package PJZ9n\LoggerPM\Library\Database\Type
+     */
     abstract class SqliteDatabase implements Database
     {
         

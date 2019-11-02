@@ -30,7 +30,7 @@
     
     declare(strict_types=1);
     
-    namespace PJZ9n\LoggerPM\Library\Database;
+    namespace PJZ9n\LoggerPM\Database;
     
     use PJZ9n\LoggerPM\Library\Database\Type\SqliteDatabase;
 

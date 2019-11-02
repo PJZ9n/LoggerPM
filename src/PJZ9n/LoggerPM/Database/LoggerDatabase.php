@@ -35,10 +35,10 @@
     use PJZ9n\LoggerPM\Library\Database\Type\SqliteDatabase;
     
     /**
-     * Class ActionLoggerDatabase
+     * Class LoggerDatabase
      * @package PJZ9n\LoggerPM\Database
      */
-    class ActionLoggerDatabase extends SqliteDatabase
+    class LoggerDatabase extends SqliteDatabase
     {
         
         public function __construct(string $filePath)

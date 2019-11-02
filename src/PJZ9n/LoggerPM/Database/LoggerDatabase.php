@@ -45,14 +45,16 @@
         {
             parent::__construct($filePath);
             
-            $sql = "CREATE TABLE IF NOT EXISTS action_logger(" .
+            $this->getSqlite3()->exec(
+                "CREATE TABLE IF NOT EXISTS action_logger(" .
                 "id INTEGER NOT NULL PRIMARY KEY," .
                 "player_name TEXT NOT NULL," .
                 "action_type TEXT NOT NULL," .
-                "action_data JSON NOT NULL," .
+                "action_data JSON," .//データ JSON
+                "action_cancelled NUMERIC," .//キャンセルされているか 論理値
                 "created_at NUMERIC NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime'))" .
-                ")";
-            $this->getSqlite3()->exec($sql);
+                ")"
+            );
         }
         
     }

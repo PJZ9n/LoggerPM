@@ -33,7 +33,7 @@
     namespace PJZ9n\LoggerPM\Database;
     
     use PJZ9n\LoggerPM\Library\Database\Type\SqliteDatabase;
-
+    
     /**
      * Class ActionLoggerDatabase
      * @package PJZ9n\LoggerPM\Database
@@ -50,7 +50,7 @@
                 "player_name TEXT NOT NULL," .
                 "action_type TEXT NOT NULL," .
                 "action_data JSON NOT NULL," .
-                "created_at NUMERIC DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime'))" .
+                "created_at NUMERIC NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime'))" .
                 ")";
             $this->getSqlite3()->exec($sql);
         }

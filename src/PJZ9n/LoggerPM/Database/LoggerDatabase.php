@@ -51,7 +51,7 @@
                 "player_name TEXT NOT NULL," .
                 "action_type TEXT NOT NULL," .
                 "action_data JSON," .//データ JSON
-                "action_cancelled NUMERIC," .//キャンセルされているか 論理値
+                "action_cancelled NUMERIC," .//キャンセルされたか 論理値
                 "created_at NUMERIC NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime'))" .
                 ")"
             );

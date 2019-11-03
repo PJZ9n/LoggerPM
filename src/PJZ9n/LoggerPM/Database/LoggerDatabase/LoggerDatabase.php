@@ -48,6 +48,7 @@
          * @param string $actionType アクションタイプ
          * @param array|null $actionData データ
          * @param bool|null $actionCancelled キャンセルされたか
+         * @throws ErrorException JSONのエンコードに失敗したとき
          * @see LogActionType $actionTypeに使う
          */
         public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null): void;

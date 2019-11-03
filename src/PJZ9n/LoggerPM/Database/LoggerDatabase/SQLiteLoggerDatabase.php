@@ -30,17 +30,17 @@
     
     declare(strict_types=1);
     
-    namespace PJZ9n\LoggerPM\Database;
+    namespace PJZ9n\LoggerPM\Database\LoggerDatabase;
     
     use PJZ9n\LoggerPM\Library\Database\Type\SqliteDatabase;
     use PJZ9n\LoggerPM\Log\LogActionType;
     use SQLite3;
     
     /**
-     * Class LoggerDatabase
-     * @package PJZ9n\LoggerPM\Database
+     * Class SQLiteLoggerDatabase
+     * @package PJZ9n\LoggerPM\Database\LoggerDatabase
      */
-    class LoggerDatabase extends SqliteDatabase
+    class SQLiteLoggerDatabase extends SqliteDatabase implements LoggerDatabase
     {
         
         public function __construct(string $filePath)
@@ -93,6 +93,16 @@
                 ")";
             
             $this->getSqlite3()->exec($sql);
+        }
+        
+        /**
+         * 全てのアクションログを取得する
+         * @param string $playerName プレイヤー名
+         * @return array
+         */
+        public function getAllActionLog(string $playerName): array
+        {
+            //
         }
         
     }

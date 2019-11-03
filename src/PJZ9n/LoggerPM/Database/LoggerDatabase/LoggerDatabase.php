@@ -31,16 +31,17 @@
     declare(strict_types=1);
     
     namespace PJZ9n\LoggerPM\Database\LoggerDatabase;
-    
+
+    use ErrorException;
     use PJZ9n\LoggerPM\Library\Database\Database;
-    
+
     /**
      * Interface LoggerDatabase
      * @package PJZ9n\LoggerPM\Database\LoggerDatabase
      */
     interface LoggerDatabase extends Database
     {
-        
+    
         /**
          * アクションログに追加する
          * @param string $playerName プレイヤー名
@@ -50,12 +51,14 @@
          * @see LogActionType $actionTypeに使う
          */
         public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null): void;
-        
+    
         /**
          * 全てのアクションログを取得する
+         * 注意: どうしても必要な時以外使わない(パフォーマンスの問題)
          * @return array
+         * @throws ErrorException JSONのデコードに失敗したとき
          */
         public function getAllActionLog(): array;
-        
-        
+    
+    
     }

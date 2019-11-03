@@ -56,10 +56,35 @@
         /**
          * 全てのアクションログを取得する
          * 注意: どうしても必要な時以外使わない(パフォーマンスの問題)
+         * @param int|null $start 開始(UNIX時間(sec))
+         * @param int|null $end 終了(UNIX時間(sec))
+         * @param int|null $limit 取得リミット
          * @return array
          * @throws ErrorException JSONのデコードに失敗したとき
          */
-        public function getAllActionLog(): array;
+        public function getActionLogAll(?int $start = null, ?int $end = null, ?int $limit = null): array;
     
+        /**
+         * プレイヤー名からアクションログを取得する
+         * @param string $playerName プレイヤー名
+         * @param int|null $start 開始(UNIX時間(sec))
+         * @param int|null $end 終了(UNIX時間(sec))
+         * @param int|null $limit 取得リミット
+         * @return array
+         * @throws ErrorException JSONのデコードに失敗したとき
+         */
+        public function getActionLogByPlayerName(string $playerName, ?int $start = null, ?int $end = null, ?int $limit = null): array;
     
+        /**
+         * アクションからアクションログを取得する
+         * @param string $actionType アクションタイプ
+         * @param int|null $start 開始(UNIX時間(sec))
+         * @param int|null $end 終了(UNIX時間(sec))
+         * @param int|null $limit 取得リミット
+         * @return array
+         * @throws ErrorException JSONのデコードに失敗したとき
+         */
+        public function getActionLogByActionType(string $actionType, ?int $start = null, ?int $end = null, ?int $limit = null): array;
+        
+        
     }

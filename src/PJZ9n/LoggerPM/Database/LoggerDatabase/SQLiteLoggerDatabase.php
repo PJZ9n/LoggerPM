@@ -31,22 +31,22 @@
     declare(strict_types=1);
     
     namespace PJZ9n\LoggerPM\Database\LoggerDatabase;
-    
+
+    use ErrorException;
     use PJZ9n\LoggerPM\Library\Database\Type\SqliteDatabase;
-    use PJZ9n\LoggerPM\Log\LogActionType;
     use SQLite3;
-    
+
     /**
      * Class SQLiteLoggerDatabase
      * @package PJZ9n\LoggerPM\Database\LoggerDatabase
      */
     class SQLiteLoggerDatabase extends SqliteDatabase implements LoggerDatabase
     {
-        
+    
         public function __construct(string $filePath)
         {
             parent::__construct($filePath);
-            
+        
             $this->getSqlite3()->exec(
                 "CREATE TABLE IF NOT EXISTS action_logger(" .
                 "id INTEGER NOT NULL PRIMARY KEY," .
@@ -58,7 +58,7 @@
                 ")"
             );
         }
-        
+    
         public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null): void
         {
             $playerName = SQLite3::escapeString($playerName);
@@ -77,37 +77,36 @@
                     $actionCancelled = "true";
                 }
             }
-            
+        
             $sql = "INSERT INTO action_logger(" .
                 "player_name, action_type, action_data, action_cancelled" .
                 ") VALUES (" .
                 "'{$playerName}', '{$actionType}', {$actionData}, {$actionCancelled}" .
                 ")";
-            
+        
             $this->getSqlite3()->exec($sql);
         }
-        
-        /**
-         * 全てのアクションログを取得する
-         * 注意: どうしても必要な時以外使わない(パフォーマンスの問題)
-         * @return array
-         */
+    
         public function getAllActionLog(): array
         {
             $sql = "SELECT * FROM action_logger";
-            
+        
             $result = $this->getSqlite3()->query($sql);
-            
+        
             $allActionLogs = [];
-            
+        
             while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 if ($row["action_data"] !== null) {
                     $row["action_data"] = json_decode($row["action_data"], true);
+                    //本当はjson_decodeが例外出してほしい！
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        throw new ErrorException(json_last_error_msg());
+                    }
                 }
                 $allActionLogs[] = $row;
             }
-            
+        
             return $allActionLogs;
         }
-        
+    
     }

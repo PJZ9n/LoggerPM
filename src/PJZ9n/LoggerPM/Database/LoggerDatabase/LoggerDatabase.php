@@ -53,10 +53,9 @@
         
         /**
          * 全てのアクションログを取得する
-         * @param string $playerName プレイヤー名
          * @return array
          */
-        public function getAllActionLog(string $playerName): array;
+        public function getAllActionLog(): array;
         
         
     }

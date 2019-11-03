@@ -59,14 +59,6 @@
             );
         }
         
-        /**
-         * アクションログに追加する
-         * @param string $playerName プレイヤー名
-         * @param string $actionType アクションタイプ
-         * @param array|null $actionData データ
-         * @param bool|null $actionCancelled キャンセルされたか
-         * @see LogActionType $actionTypeに使う
-         */
         public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null): void
         {
             $playerName = SQLite3::escapeString($playerName);
@@ -97,12 +89,25 @@
         
         /**
          * 全てのアクションログを取得する
-         * @param string $playerName プレイヤー名
+         * 注意: どうしても必要な時以外使わない(パフォーマンスの問題)
          * @return array
          */
-        public function getAllActionLog(string $playerName): array
+        public function getAllActionLog(): array
         {
-            //
+            $sql = "SELECT * FROM action_logger";
+            
+            $result = $this->getSqlite3()->query($sql);
+            
+            $allActionLogs = [];
+            
+            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                if ($row["action_data"] !== null) {
+                    $row["action_data"] = json_decode($row["action_data"], true);
+                }
+                $allActionLogs[] = $row;
+            }
+            
+            return $allActionLogs;
         }
         
     }

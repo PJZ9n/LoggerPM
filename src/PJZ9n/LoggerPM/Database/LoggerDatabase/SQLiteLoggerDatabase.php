@@ -33,7 +33,8 @@
     namespace PJZ9n\LoggerPM\Database\LoggerDatabase;
 
     use PJZ9n\LoggerPM\Library\Database\Type\SqliteDatabase;
-
+    use PJZ9n\LoggerPM\Utils\DateTime;
+    
     /**
      * Class SQLiteLoggerDatabase
      * @package PJZ9n\LoggerPM\Database\LoggerDatabase
@@ -45,7 +46,8 @@
         {
             parent::__construct($filePath);
     
-            $sql = <<< SQL
+            $sql = /** @lang SQLite */
+                <<< SQL
                 CREATE TABLE IF NOT EXISTS action_logger(
                     id INTEGER NOT NULL PRIMARY KEY,
                     player_name TEXT NOT NULL,
@@ -55,13 +57,13 @@
                     created_at NUMERIC NOT NULL DEFAULT (datetime(CURRENT_TIMESTAMP,'localtime'))
                 )
             SQL;
-    
             $this->getSqlite3()->exec($sql);
         }
     
         public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null): void
         {
-            $sql = <<< SQL
+            $sql = /** @lang SQLite */
+                <<< SQL
                 INSERT INTO action_logger(
                     player_name,
                     action_type,
@@ -90,7 +92,16 @@
     
         public function getActionLogAll(?int $start = null, ?int $end = null, ?int $limit = null): array
         {
-            return [];
+            $sql = "SELECT * FROM action_logger\n";
+            $sql .= $this->getConditionsSqlStatement($start, $end, $limit);
+    
+            $result = $this->getSqlite3()->query($sql);
+    
+            $return = [];
+            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+            return $return;
         }
     
         public function getActionLogByPlayerName(string $playerName, ?int $start = null, ?int $end = null, ?int $limit = null): array
@@ -103,6 +114,35 @@
         {
             // TODO: Implement getActionLogByActionType() method.
             return [];
+        }
+    
+        /**
+         * 条件のSQL文を取得する TODO: 適切な関数名に変更する
+         * @param int|null $start
+         * @param int|null $end
+         * @param int|null $limit
+         * @return string
+         */
+        private function getConditionsSqlStatement(?int $start, ?int $end, ?int $limit): string
+        {
+            $startDateTime = $start === null ? null : DateTime::getDateTimeByUnixTime($start);
+            $endDateTime = $end === null ? null : DateTime::getDateTimeByUnixTime($end);
+        
+            $sql = "";
+        
+            if ($startDateTime !== null) {
+                $sql .= "WHERE\n";
+                $sql .= "created_at >= '{$startDateTime}'\n";
+            }
+            if ($endDateTime !== null) {
+                $sql .= $startDateTime !== null ? "AND\n" : "WHERE\n";
+                $sql .= "created_at <= '{$endDateTime}'\n";
+            }
+            if ($limit !== null) {
+                $sql .= "LIMIT {$limit}";
+            }
+        
+            return $sql;
         }
         
     }

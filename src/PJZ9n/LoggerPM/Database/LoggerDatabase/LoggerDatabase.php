@@ -60,7 +60,6 @@
          * @param int|null $end 終了(UNIX時間(sec))
          * @param int|null $limit 取得リミット
          * @return array
-         * @throws ErrorException JSONのデコードに失敗したとき
          */
         public function getActionLogAll(?int $start = null, ?int $end = null, ?int $limit = null): array;
     
@@ -71,7 +70,6 @@
          * @param int|null $end 終了(UNIX時間(sec))
          * @param int|null $limit 取得リミット
          * @return array
-         * @throws ErrorException JSONのデコードに失敗したとき
          */
         public function getActionLogByPlayerName(string $playerName, ?int $start = null, ?int $end = null, ?int $limit = null): array;
     
@@ -82,7 +80,6 @@
          * @param int|null $end 終了(UNIX時間(sec))
          * @param int|null $limit 取得リミット
          * @return array
-         * @throws ErrorException JSONのデコードに失敗したとき
          */
         public function getActionLogByActionType(string $actionType, ?int $start = null, ?int $end = null, ?int $limit = null): array;
         

@@ -42,6 +42,54 @@
     class SQLiteLoggerDatabase extends SqliteDatabase implements LoggerDatabase
     {
     
+        /**
+         * 条件のSQL文を取得する TODO: 適切な関数名に変更する
+         * @param int|null $start
+         * @param int|null $end
+         * @param int|null $limit
+         * @param string|null $opt
+         * @return string
+         */
+        private static function getConditionsSqlStatement(?int $start, ?int $end, ?int $limit, ?string $opt = null): string
+        {
+            $startDateTime = $start === null ? null : DateTime::getDateTimeByUnixTime($start);
+            $endDateTime = $end === null ? null : DateTime::getDateTimeByUnixTime($end);
+        
+            $sql = "";
+        
+            $sql .= $opt !== null ? "WHERE\n" . $opt : "";
+        
+            if ($startDateTime !== null) {
+                $sql .= $opt !== null ? "AND\n" : "WHERE\n";
+                $sql .= "created_at >= '{$startDateTime}'\n";
+            }
+            if ($endDateTime !== null) {
+                $sql .= $opt !== null || $startDateTime !== null ? "AND\n" : "";
+                $sql .= "created_at <= '{$endDateTime}'\n";
+            }
+            if ($limit !== null) {
+                $sql .= "LIMIT {$limit}";
+            }
+        
+            return $sql;
+        }
+    
+        /**
+         * ログを適切な形式に変更する
+         * @param array $logs
+         * @return array
+         */
+        private static function convertLogFormat(array $logs): array
+        {
+            $converted = [];
+            foreach ($logs as $index => $log) {
+                $log["action_data"] = $log["action_data"] !== null ? json_decode($log["action_data"], true) : null;
+                $log["created_at"] = DateTime::getUnixTimeByDateTime($log["created_at"]);
+                $converted[$index] = $log;
+            }
+            return $converted;
+        }
+        
         public function __construct(string $filePath)
         {
             parent::__construct($filePath);
@@ -90,86 +138,44 @@
             $stmt->close();
         }
     
-        public function getActionLogAll(?int $start = null, ?int $end = null, ?int $limit = null): array
+        public function getActionLog(?string $playerName = null, ?string $actionType = null, ?int $start = null, ?int $end = null, ?int $limit = null): array
         {
             $sql = "SELECT * FROM action_logger\n";
-            $sql .= $this->getConditionsSqlStatement($start, $end, $limit);
     
-            $result = $this->getSqlite3()->query($sql);
+            $opt = "";
     
-            $return = [];
-            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                $return[] = $row;
+            if ($playerName !== null) {
+                $opt .= "player_name = :player_name\n";
             }
-            return $return;
-        }
+            if ($actionType !== null) {
+                $opt .= $playerName !== null ? "AND\n" : "";
+                $opt .= "action_type = :action_type\n";
+            }
     
-        public function getActionLogByPlayerName(string $playerName, ?int $start = null, ?int $end = null, ?int $limit = null): array
-        {
-            $sql = "SELECT * FROM action_logger\n";
-            $sql .= $this->getConditionsSqlStatement($start, $end, $limit, "player_name = :player_name");
+            $opt = $opt === "" ? null : $opt;
+    
+            //var_dump($opt);
+            //var_dump(str_replace("\n", "", $opt));
+    
+            $sql .= self::getConditionsSqlStatement($start, $end, $limit, $opt);
+    
+            //var_dump(str_replace("\n", " ", $sql));
     
             $stmt = $this->getSqlite3()->prepare($sql);
-            $stmt->bindValue(":player_name", $playerName, SQLITE3_TEXT);
+            $playerName === null ?
+                $stmt->bindValue(":player_name", null, SQLITE3_NULL) :
+                $stmt->bindValue(":player_name", $playerName, SQLITE3_TEXT);
+            $actionType === null ?
+                $stmt->bindValue(":action_type", null, SQLITE3_NULL) :
+                $stmt->bindValue(":action_type", $actionType, SQLITE3_TEXT);
             $result = $stmt->execute();
-    
+            
             $return = [];
             while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
                 $return[] = $row;
             }
             $stmt->close();
-            return $return;
-        }
-    
-        public function getActionLogByActionType(string $actionType, ?int $start = null, ?int $end = null, ?int $limit = null): array
-        {
-            $sql = "SELECT * FROM action_logger\n";
-            $sql .= $this->getConditionsSqlStatement($start, $end, $limit, "action_type = :action_type");
-    
-            $stmt = $this->getSqlite3()->prepare($sql);
-            $stmt->bindValue(":action_type", $actionType, SQLITE3_TEXT);
-            $result = $stmt->execute();
-    
-            $return = [];
-            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
-                $return[] = $row;
-            }
-            $stmt->close();
-            return $return;
-        }
-    
-        /**
-         * 条件のSQL文を取得する TODO: 適切な関数名に変更する
-         * @param int|null $start
-         * @param int|null $end
-         * @param int|null $limit
-         * @param string|null $opt
-         * @return string
-         */
-        private function getConditionsSqlStatement(?int $start, ?int $end, ?int $limit, ?string $opt = null): string
-        {
-            $startDateTime = $start === null ? null : DateTime::getDateTimeByUnixTime($start);
-            $endDateTime = $end === null ? null : DateTime::getDateTimeByUnixTime($end);
-    
-            $sql = "";
-    
-            $sql .= "WHERE\n";
-    
-            $sql .= $opt !== null ? $opt . "\n" : "";
-    
-            if ($startDateTime !== null) {
-                $sql .= $opt !== null ? "AND\n" : "";
-                $sql .= "created_at >= '{$startDateTime}'\n";
-            }
-            if ($endDateTime !== null) {
-                $sql .= $opt !== null || $startDateTime !== null ? "AND\n" : "";
-                $sql .= "created_at <= '{$endDateTime}'\n";
-            }
-            if ($limit !== null) {
-                $sql .= "LIMIT {$limit}";
-            }
-    
-            return $sql;
+            return self::convertLogFormat($return);
         }
         
     }

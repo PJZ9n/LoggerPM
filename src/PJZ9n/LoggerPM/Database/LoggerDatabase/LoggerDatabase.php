@@ -32,7 +32,6 @@
     
     namespace PJZ9n\LoggerPM\Database\LoggerDatabase;
 
-    use ErrorException;
     use PJZ9n\LoggerPM\Library\Database\Database;
 
     /**
@@ -53,34 +52,16 @@
         public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null): void;
     
         /**
-         * 全てのアクションログを取得する
-         * 注意: どうしても必要な時以外使わない(パフォーマンスの問題)
-         * @param int|null $start 開始(UNIX時間(sec))
-         * @param int|null $end 終了(UNIX時間(sec))
-         * @param int|null $limit 取得リミット
-         * @return array
+         * アクションログを取得する
+         * @param string|null $playerName プレイヤー名
+         * @param string|null $actionType アクションタイプ
+         * @param int|null $start 開始(UNIX時間)
+         * @param int|null $end 終了(UNIX時間)
+         * @param int|null $limit 取得リミット件数
+         * @return array ログデータ
+         * @deprecated getActionLog()を使うべき
          */
-        public function getActionLogAll(?int $start = null, ?int $end = null, ?int $limit = null): array;
-    
-        /**
-         * プレイヤー名からアクションログを取得する
-         * @param string $playerName プレイヤー名
-         * @param int|null $start 開始(UNIX時間(sec))
-         * @param int|null $end 終了(UNIX時間(sec))
-         * @param int|null $limit 取得リミット
-         * @return array
-         */
-        public function getActionLogByPlayerName(string $playerName, ?int $start = null, ?int $end = null, ?int $limit = null): array;
-    
-        /**
-         * アクションからアクションログを取得する
-         * @param string $actionType アクションタイプ
-         * @param int|null $start 開始(UNIX時間(sec))
-         * @param int|null $end 終了(UNIX時間(sec))
-         * @param int|null $limit 取得リミット
-         * @return array
-         */
-        public function getActionLogByActionType(string $actionType, ?int $start = null, ?int $end = null, ?int $limit = null): array;
+        public function getActionLog(?string $playerName = null, ?string $actionType = null, ?int $start = null, ?int $end = null, ?int $limit = null): array;
         
         
     }

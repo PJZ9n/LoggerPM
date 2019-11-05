@@ -31,7 +31,11 @@
     declare(strict_types=1);
     
     namespace PJZ9n\LoggerPM\Utils;
-    
+
+    /**
+     * Class DateTime
+     * @package PJZ9n\LoggerPM\Utils
+     */
     final class DateTime
     {
         

@@ -3,7 +3,7 @@ High performance PocketMine-MP logger plugin.
 
 PocketMine-MP用高性能ロガープラグイン
 
-[![](https://img.shields.io/badge/license-GPL-blue)](https://github.com/PJZ9n/LoggerPM/blob/master/LICENSE)
+[![](https://img.shields.io/badge/license-GNU%20General%20Public%20License%20v3.0-yellow)](https://github.com/PJZ9n/LoggerPM/blob/master/LICENSE)
 
 <!--- [![](https://poggit.pmmp.io/ci.badge/PJZ9n/LoggerPM/LoggerPM)](https://poggit.pmmp.io/ci/PJZ9n/LoggerPM) --->
 [![](https://poggit.pmmp.io/ci.shield/PJZ9n/LoggerPM/LoggerPM)](https://poggit.pmmp.io/ci/PJZ9n/LoggerPM)

@@ -106,14 +106,36 @@
     
         public function getActionLogByPlayerName(string $playerName, ?int $start = null, ?int $end = null, ?int $limit = null): array
         {
-            // TODO: Implement getActionLogByPlayerName() method.
-            return [];
+            $sql = "SELECT * FROM action_logger\n";
+            $sql .= $this->getConditionsSqlStatement($start, $end, $limit, "player_name = :player_name");
+    
+            $stmt = $this->getSqlite3()->prepare($sql);
+            $stmt->bindValue(":player_name", $playerName, SQLITE3_TEXT);
+            $result = $stmt->execute();
+    
+            $return = [];
+            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+            $stmt->close();
+            return $return;
         }
     
         public function getActionLogByActionType(string $actionType, ?int $start = null, ?int $end = null, ?int $limit = null): array
         {
-            // TODO: Implement getActionLogByActionType() method.
-            return [];
+            $sql = "SELECT * FROM action_logger\n";
+            $sql .= $this->getConditionsSqlStatement($start, $end, $limit, "action_type = :action_type");
+    
+            $stmt = $this->getSqlite3()->prepare($sql);
+            $stmt->bindValue(":action_type", $actionType, SQLITE3_TEXT);
+            $result = $stmt->execute();
+    
+            $return = [];
+            while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+                $return[] = $row;
+            }
+            $stmt->close();
+            return $return;
         }
     
         /**
@@ -121,27 +143,32 @@
          * @param int|null $start
          * @param int|null $end
          * @param int|null $limit
+         * @param string|null $opt
          * @return string
          */
-        private function getConditionsSqlStatement(?int $start, ?int $end, ?int $limit): string
+        private function getConditionsSqlStatement(?int $start, ?int $end, ?int $limit, ?string $opt = null): string
         {
             $startDateTime = $start === null ? null : DateTime::getDateTimeByUnixTime($start);
             $endDateTime = $end === null ? null : DateTime::getDateTimeByUnixTime($end);
-        
+    
             $sql = "";
-        
+    
+            $sql .= "WHERE\n";
+    
+            $sql .= $opt !== null ? $opt . "\n" : "";
+    
             if ($startDateTime !== null) {
-                $sql .= "WHERE\n";
+                $sql .= $opt !== null ? "AND\n" : "";
                 $sql .= "created_at >= '{$startDateTime}'\n";
             }
             if ($endDateTime !== null) {
-                $sql .= $startDateTime !== null ? "AND\n" : "WHERE\n";
+                $sql .= $opt !== null || $startDateTime !== null ? "AND\n" : "";
                 $sql .= "created_at <= '{$endDateTime}'\n";
             }
             if ($limit !== null) {
                 $sql .= "LIMIT {$limit}";
             }
-        
+    
             return $sql;
         }
         

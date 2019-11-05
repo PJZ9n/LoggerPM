@@ -59,7 +59,6 @@
          * @param int|null $end 終了(UNIX時間)
          * @param int|null $limit 取得リミット件数
          * @return array ログデータ
-         * @deprecated getActionLog()を使うべき
          */
         public function getActionLog(?string $playerName = null, ?string $actionType = null, ?int $start = null, ?int $end = null, ?int $limit = null): array;
         

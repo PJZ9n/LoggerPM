@@ -33,28 +33,32 @@
     namespace PJZ9n\LoggerPM\Library\Database\Type;
     
     use PJZ9n\LoggerPM\Library\Database\Database;
-    use pocketmine\utils\Config;
 
     /**
      * Class YamlDatabase
      * @package PJZ9n\LoggerPM\Library\Database\Type
      */
-    abstract class YamlDatabase extends Config implements Database
+    abstract class YamlDatabase implements Database
     {
         
         /** @var string */
         private $filePath;
+    
+        /** @var array */
+        private $data;
         
         public function __construct(string $filePath)
         {
-            parent::__construct($filePath, Config::YAML);
-            
             $this->filePath = $filePath;
+    
+            !file_exists($filePath) ?
+                $this->data = [] :
+                $this->data = json_decode((file_get_contents($filePath)), true);
         }
         
         public function __destruct()
         {
-            $this->save();
+            file_put_contents($this->filePath, json_encode($this->data, JSON_PRETTY_PRINT));
         }
         
         public function getFilePath(): string

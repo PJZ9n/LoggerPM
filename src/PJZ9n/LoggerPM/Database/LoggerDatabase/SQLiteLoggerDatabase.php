@@ -42,6 +42,8 @@
     class SQLiteLoggerDatabase extends SqliteDatabase implements LoggerDatabase
     {
     
+        //HACK: とりあえず動くけど最悪なコード
+        
         /**
          * 条件のSQL文を取得する TODO: 適切な関数名に変更する
          * @param int|null $start
@@ -54,11 +56,11 @@
         {
             $startDateTime = $start === null ? null : DateTime::getDateTimeByUnixTime($start);
             $endDateTime = $end === null ? null : DateTime::getDateTimeByUnixTime($end);
-        
+    
             $sql = "";
-        
+    
             $sql .= $opt !== null ? "WHERE\n" . $opt : "";
-        
+    
             if ($startDateTime !== null) {
                 $sql .= $opt !== null ? "AND\n" : "WHERE\n";
                 $sql .= "created_at >= '{$startDateTime}'\n";
@@ -70,7 +72,7 @@
             if ($limit !== null) {
                 $sql .= "LIMIT {$limit}";
             }
-        
+    
             return $sql;
         }
     

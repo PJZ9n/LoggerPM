@@ -7,7 +7,15 @@
 #               __/ | __/ |
 #              |___/ |___/
 #
-# ----- LoggerPM Configuration File (設定ファイル) -----
+# ----- LoggerPM Configuration File -----
+# ----- LoggerPM 設定ファイル -----
 
-# Language (言語)
+# -- English --
+# Language Setting
+# Check the ./languages/ folder for available languages. You can use the value obtained by removing .ini from the file name.
+# e.g. ./languages/eng.ini => eng
+# -- 日本語 --
+# 言語設定
+# 利用可能な言語は "./languages/" フォルダを確認してください。ファイル名から ".ini" を取り除いた値が使用できます。
+# 例えば ./languages/jpn.ini => jpn
 language: eng

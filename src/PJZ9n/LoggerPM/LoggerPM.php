@@ -35,7 +35,6 @@
     use pocketmine\command\Command;
     use pocketmine\event\Listener;
     use pocketmine\plugin\PluginBase;
-    use RuntimeException;
     
     /**
      * Class LoggerPM
@@ -43,22 +42,6 @@
      */
     class LoggerPM extends PluginBase
     {
-        
-        /** @var LoggerPM */
-        private static $instance = null;
-        
-        public static function getInstance(): LoggerPM
-        {
-            if (self::$instance === null) {
-                throw new RuntimeException("Attempt to retrieve This instance outside main thread");
-            }
-            return self::$instance;
-        }
-        
-        public function onLoad(): void
-        {
-            self::$instance = $this;
-        }
         
         public function onEnable(): void
         {

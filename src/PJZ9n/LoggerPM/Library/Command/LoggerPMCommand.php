@@ -39,7 +39,11 @@
     use pocketmine\Player;
     use pocketmine\plugin\Plugin;
     use pocketmine\utils\TextFormat;
-    
+
+    /**
+     * Class LoggerPMCommand
+     * @package PJZ9n\LoggerPM\Library\Command
+     */
     abstract class LoggerPMCommand extends PluginCommand
     {
         

@@ -46,10 +46,10 @@
     {
     
         /** @var bool */
-        private const DEBUG_CONFIG_OVERWRITE = true;
+        private const DEBUG_CONFIG_OVERWRITE = false;
     
         /** @var bool */
-        private const DEBUG_LANGUAGE_FORCE_OVERWRITE = true;
+        private const DEBUG_LANGUAGE_FORCE_OVERWRITE = false;
         
         /** @var LogManager */
         private $logManager;

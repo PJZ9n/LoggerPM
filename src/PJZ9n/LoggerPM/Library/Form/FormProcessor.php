@@ -34,9 +34,9 @@
     
     use pocketmine\form\FormValidationException;
     use pocketmine\Player;
-    
+
     /**
-     * Class FormProcessor
+     * Interface FormProcessor
      * @package PJZ9n\LoggerPM\Library\Form
      */
     interface FormProcessor

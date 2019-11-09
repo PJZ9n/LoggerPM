@@ -252,5 +252,13 @@
         {
             return $this->plugin;
         }
+    
+        /**
+         * @return BaseLang
+         */
+        public function getLang(): BaseLang
+        {
+            return $this->lang;
+        }
         
     }

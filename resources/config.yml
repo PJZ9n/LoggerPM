@@ -18,4 +18,4 @@
 # 言語設定
 # 利用可能な言語は "./languages/" フォルダを確認してください。ファイル名から ".ini" を取り除いた値が使用できます。
 # 例えば ./languages/jpn.ini => jpn
-language: eng
+language: {language}

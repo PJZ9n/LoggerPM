@@ -45,6 +45,12 @@
     class LoggerPM extends PluginBase
     {
     
+        /** @var bool */
+        private const DEBUG_CONFIG_OVERWRITE = true;
+    
+        /** @var bool */
+        private const DEBUG_LANGUAGE_FORCE_OVERWRITE = true;
+        
         /** @var LogManager */
         private $logManager;
     
@@ -54,23 +60,33 @@
         public function onEnable(): void
         {
             $this->initialize();
-        
+    
             $this->sendStartupMessage();
         }
     
         private function initialize(): void
         {
+            if (self::DEBUG_CONFIG_OVERWRITE) {
+                unlink($this->getDataFolder() . "config.yml");
+            }
+            
             $this->saveDefaultConfig();
-        
+    
             //OPTIMIZE
             $rawConfigFile = file_get_contents($this->getDataFolder() . "config.yml");
-            $rawConfigFile = str_replace("{language}", $this->getServer()->getLanguage()->getLang(), $rawConfigFile);
+            $search = [
+                "{language}",
+            ];
+            $replace = [
+                $this->getServer()->getLanguage()->getLang(),
+            ];
+            $rawConfigFile = str_replace($search, $replace, $rawConfigFile);
             file_put_contents($this->getDataFolder() . "config.yml", $rawConfigFile);
-        
+    
             $this->reloadConfig();
-        
+    
             $this->logManager = new LogManager($this);
-        
+    
             foreach ($this->getResources() as $resource) {
                 $path = explode(DIRECTORY_SEPARATOR, $resource->getPath());
                 $last = end($path);//WARNING: 内部ポインタを移動させます
@@ -98,8 +114,8 @@
                 $allowOverwrte = $old["allow-overwrite"];
                 $oldVersion = explode(".", $old["version"]);
                 $newVersion = explode(".", $new["version"]);
-                if ($oldVersion[0] < $newVersion[0] || $oldVersion[1] < $newVersion[1] || $oldVersion[2] < $newVersion[2]) {
-                    if ($allowOverwrte === "yes") {
+                if (self::DEBUG_LANGUAGE_FORCE_OVERWRITE || $oldVersion[0] < $newVersion[0] || $oldVersion[1] < $newVersion[1] || $oldVersion[2] < $newVersion[2]) {
+                    if (self::DEBUG_LANGUAGE_FORCE_OVERWRITE || $allowOverwrte === "yes") {
                         $this->saveResource($newLangFile, true);
                         $this->getLogger()->notice("Updated language file {$oldLangFile} from {$old["version"]} to {$new["version"]}!");
                         //$this->getLogger()->notice("言語ファイル {$oldLangFile} を {$old["version"]} から {$new["version"]} にアップデートしました！");
@@ -112,10 +128,29 @@
                     //$this->getLogger()->info("言語ファイル {$oldLangFile} ($old["version"]) はすでに最新です！");
                 }
             }
-        
+    
             $this->lang = new BaseLang(strval($this->getConfig()->get("language")), $this->getDataFolder() . "languages/");
             $this->getLogger()->info($this->lang->translateString("language.selected", [$this->lang->getName(), $this->lang->getLang()]));
-        
+    
+            //OPTIMIZE
+            $rawConfigFile = file_get_contents($this->getDataFolder() . "config.yml");
+            $search = [
+                "{file-description}",
+                "{language-description1}",
+                "{language-description2}",
+                "{language-description3}",
+            ];
+            $replace = [
+                $this->lang->translateString("file.description"),
+                $this->lang->translateString("language.description1"),
+                $this->lang->translateString("language.description2"),
+                $this->lang->translateString("language.description3"),
+            ];
+            $rawConfigFile = str_replace($search, $replace, $rawConfigFile);
+            file_put_contents($this->getDataFolder() . "config.yml", $rawConfigFile);
+    
+            $this->reloadConfig();
+            
             /** @var $listeners Listener[] */
             $listeners = [
                 //
@@ -123,7 +158,7 @@
             foreach ($listeners as $listener) {
                 $this->getServer()->getPluginManager()->registerEvents($listener, $this);
             }
-        
+    
             /** @var $commands Command[] */
             $commands = [
                 //

@@ -9,7 +9,13 @@
 #
 # {file-description}
 
+# {version-description1}
+# {version-description2}
+version: 1.0.0
+
 # {language-description1}
 # {language-description2}
 # {language-description3}
 language: {language}
+
+clean-up: {clean-up}

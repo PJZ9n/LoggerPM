@@ -37,19 +37,14 @@
     use pocketmine\event\Listener;
     use pocketmine\lang\BaseLang;
     use pocketmine\plugin\PluginBase;
-
+    use RuntimeException;
+    
     /**
      * Class LoggerPM
      * @package PJZ9n\LoggerPM
      */
     class LoggerPM extends PluginBase
     {
-    
-        /** @var bool */
-        private const DEBUG_CONFIG_OVERWRITE = false;
-    
-        /** @var bool */
-        private const DEBUG_LANGUAGE_FORCE_OVERWRITE = false;
         
         /** @var LogManager */
         private $logManager;
@@ -59,98 +54,131 @@
     
         public function onEnable(): void
         {
-            $this->initialize();
-    
+            $this->initConfig();
+            $this->initLanguage();
+            $this->initConfigComments();
+            $this->logManager = new LogManager($this);
             $this->sendStartupMessage();
         }
     
-        private function initialize(): void
+        private function initConfig(): void
         {
-            if (self::DEBUG_CONFIG_OVERWRITE) {
-                unlink($this->getDataFolder() . "config.yml");
+            $filePath = $this->getDataFolder() . "config.yml";
+            if (DebugInfo::CONFIG_FORCE_RENEW && file_exists($filePath)) {
+                unlink($filePath);
             }
-            
-            $this->saveDefaultConfig();
+            if (!file_exists($filePath)) {
+                $this->saveResource("config.yml");
+                $this->initConfigValues();
+                $this->getLogger()->notice("Created config.yml!");
+                return;
+            }
+            $this->reloadConfig();
+            $oldVersion = $this->getConfig()->get("version");
+            $configResource = null;
+            foreach ($this->getResources() as $resource) {
+                if ($resource->getFilename() === "config.yml") {
+                    $configResource = $resource;
+                }//TODO: パスも検証する
+            }
+            if ($configResource === null) {
+                throw new RuntimeException("\"config.yml\" does not exist in resources");
+            }
+            $get = yaml_parse(file_get_contents($configResource->getRealPath()));
+            if (!isset($get["version"])) {
+                throw new RuntimeException("\"version\" does not exist in {$configResource->getRealPath()}");
+            }
+            $newVersion = $get["version"];
+            if (!version_compare($oldVersion, $newVersion, "<")) {
+                //config.yml is latest
+                $this->initConfigValues();
+                $this->getLogger()->info("config.yml is latest version ({$oldVersion})!");
+                return;
+            }
+            $data = $this->getConfig()->getAll();
+            $this->saveResource("config.yml", true);
+            $this->initConfigValues($data);
+            $this->getLogger()->notice("Updated config.yml from {$oldVersion} to {$newVersion}!");
+        }
     
-            //OPTIMIZE
-            $rawConfigFile = file_get_contents($this->getDataFolder() . "config.yml");
+        private function initConfigValues(array $data = []): void
+        {
+            $filePath = $this->getDataFolder() . "config.yml";
             $search = [
                 "{language}",
+                "{clean-up}",
             ];
             $replace = [
-                $this->getServer()->getLanguage()->getLang(),
+                $data["language"] ?? (DebugInfo::CONFIG_FORCE_LANGUAGE ?? $this->getServer()->getLanguage()->getLang()),
+                $data["clean-up"] ?? 30,
             ];
-            $rawConfigFile = str_replace($search, $replace, $rawConfigFile);
-            file_put_contents($this->getDataFolder() . "config.yml", $rawConfigFile);
-    
+            file_put_contents($filePath, str_replace($search, $replace, file_get_contents($filePath)));
             $this->reloadConfig();
+        }
     
-            $this->logManager = new LogManager($this);
-    
-            foreach ($this->getResources() as $resource) {
-                $path = explode(DIRECTORY_SEPARATOR, $resource->getPath());
-                $last = end($path);//WARNING: 内部ポインタを移動させます
-                if ($last !== "languages" || $resource->getExtension() !== "ini") {
-                    continue;
-                }
-                $oldLangFile = $this->getDataFolder() . "languages/" . $resource->getFilename();
-                $newLangFile = $last . DIRECTORY_SEPARATOR . $resource->getFilename();
-                if (!file_exists($oldLangFile)) {
-                    $this->saveResource($newLangFile);
-                    continue;
-                }
-                $old = array_map('\stripcslashes', parse_ini_file($oldLangFile, false, INI_SCANNER_RAW));
-                if (!isset($old["version"]) || !isset($old["allow-overwrite"])) {
-                    $this->getLogger()->warning("Failed to load language file: {$oldLangFile}");
-                    $this->getLogger()->warning("A required parameter is missing.");
-                    continue;
-                }
-                $new = array_map('\stripcslashes', parse_ini_file($resource->getRealPath(), false, INI_SCANNER_RAW));
-                if (!isset($new["version"]) || !isset($new["allow-overwrite"])) {
-                    $this->getLogger()->warning("Failed to load language file (resources): {$resource->getRealPath()}");
-                    $this->getLogger()->warning("A required parameter is missing.");
-                    continue;
-                }
-                $allowOverwrte = $old["allow-overwrite"];
-                $oldVersion = explode(".", $old["version"]);
-                $newVersion = explode(".", $new["version"]);
-                if (self::DEBUG_LANGUAGE_FORCE_OVERWRITE || $oldVersion[0] < $newVersion[0] || $oldVersion[1] < $newVersion[1] || $oldVersion[2] < $newVersion[2]) {
-                    if (self::DEBUG_LANGUAGE_FORCE_OVERWRITE || $allowOverwrte === "yes") {
-                        $this->saveResource($newLangFile, true);
-                        $this->getLogger()->notice("Updated language file {$oldLangFile} from {$old["version"]} to {$new["version"]}!");
-                        //$this->getLogger()->notice("言語ファイル {$oldLangFile} を {$old["version"]} から {$new["version"]} にアップデートしました！");
-                    } /** @noinspection PhpStatementHasEmptyBodyInspection */ else {
-                        //$this->getLogger()->notice("Language file {$oldLangFile} could not be updated because overwrite is off.");
-                        //$this->getLogger()->notice("言語ファイル {$oldLangFile} の上書きが無効なため、アップデートができませんでした。");
-                    }
-                } /** @noinspection PhpStatementHasEmptyBodyInspection */ else {
-                    //$this->getLogger()->info("Language file {$oldLangFile} ({$old["version"]}) is the already latest!");
-                    //$this->getLogger()->info("言語ファイル {$oldLangFile} ($old["version"]) はすでに最新です！");
-                }
-            }
-    
-            $this->lang = new BaseLang(strval($this->getConfig()->get("language")), $this->getDataFolder() . "languages/");
-            $this->getLogger()->info($this->lang->translateString("language.selected", [$this->lang->getName(), $this->lang->getLang()]));
-    
-            //OPTIMIZE
-            $rawConfigFile = file_get_contents($this->getDataFolder() . "config.yml");
+        private function initConfigComments(): void
+        {
+            $filePath = $this->getDataFolder() . "config.yml";
             $search = [
                 "{file-description}",
+                "{version-description1}",
+                "{version-description2}",
                 "{language-description1}",
                 "{language-description2}",
                 "{language-description3}",
             ];
             $replace = [
                 $this->lang->translateString("file.description"),
+                $this->lang->translateString("version.description1"),
+                $this->lang->translateString("version.description2"),
                 $this->lang->translateString("language.description1"),
                 $this->lang->translateString("language.description2"),
                 $this->lang->translateString("language.description3"),
             ];
-            $rawConfigFile = str_replace($search, $replace, $rawConfigFile);
-            file_put_contents($this->getDataFolder() . "config.yml", $rawConfigFile);
+            file_put_contents($filePath, str_replace($search, $replace, file_get_contents($filePath)));
+        }
     
-            $this->reloadConfig();
-            
+        private function initLanguage(): void
+        {
+            foreach ($this->getResources() as $resource) {
+                $path = explode(DIRECTORY_SEPARATOR, $resource->getPath());
+                $last = end($path);
+                if ($last !== "locale" || $resource->getExtension() !== "ini") {
+                    continue;
+                }
+                $oldLangFile = $this->getDataFolder() . "locale/" . $resource->getFilename();
+                $newLangFile = $last . DIRECTORY_SEPARATOR . $resource->getFilename();
+                if (!file_exists($oldLangFile)) {
+                    $this->saveResource($newLangFile);
+                    continue;
+                }
+                $old = array_map('\stripcslashes', parse_ini_file($oldLangFile, false, INI_SCANNER_RAW));
+                if (!isset($old["version"]) || !isset($old["auto-update"])) {
+                    $this->getLogger()->warning("Failed to load language file: {$oldLangFile}");
+                    $this->getLogger()->warning("A required parameter is missing.");
+                    continue;
+                }
+                $new = array_map('\stripcslashes', parse_ini_file($resource->getRealPath(), false, INI_SCANNER_RAW));
+                if (!isset($new["version"]) || !isset($new["auto-update"])) {
+                    $this->getLogger()->warning("Failed to load language file (resources): {$resource->getRealPath()}");
+                    $this->getLogger()->warning("A required parameter is missing.");
+                    continue;
+                }
+                $autoUpdate = $old["auto-update"];
+                $oldVersion = $old["version"];
+                $newVersion = $new["version"];
+                if (DebugInfo::LANGUAGE_FORCE_UPDATE || version_compare($oldVersion, $newVersion, "<")) {
+                    if (DebugInfo::LANGUAGE_FORCE_UPDATE || $autoUpdate === "yes") {
+                        $this->saveResource($newLangFile, true);
+                        $this->getLogger()->notice("Updated language file {$oldLangFile} from {$old["version"]} to {$new["version"]}!");
+                    }
+                }
+            }
+            $this->lang = new BaseLang((string)$this->getConfig()->get("language"), $this->getDataFolder() . "locale/");
+        }
+    
+        private function registerEvents(): void
+        {
             /** @var $listeners Listener[] */
             $listeners = [
                 //
@@ -158,14 +186,17 @@
             foreach ($listeners as $listener) {
                 $this->getServer()->getPluginManager()->registerEvents($listener, $this);
             }
+        }
     
+        private function registerCommands(): void
+        {
             /** @var $commands Command[] */
             $commands = [
                 //
             ];
             $this->getServer()->getCommandMap()->registerAll("LoggerPM", $commands);
         }
-    
+        
         private function sendStartupMessage(): void
         {
             $this->getLogger()->notice($this->lang->translateString("license1"));

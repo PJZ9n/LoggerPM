@@ -58,6 +58,8 @@
             $this->initLanguage();
             $this->initConfigComments();
             $this->logManager = new LogManager($this);
+            $this->registerEvents();
+            $this->registerCommands();
             $this->sendStartupMessage();
         }
     
@@ -106,11 +108,11 @@
             $filePath = $this->getDataFolder() . "config.yml";
             $search = [
                 "{language}",
-                "{clean-up}",
+                "{cleanup}",
             ];
             $replace = [
                 $data["language"] ?? (DebugInfo::CONFIG_FORCE_LANGUAGE ?? $this->getServer()->getLanguage()->getLang()),
-                $data["clean-up"] ?? 30,
+                $data["cleanup"] ?? 30,
             ];
             file_put_contents($filePath, str_replace($search, $replace, file_get_contents($filePath)));
             $this->reloadConfig();
@@ -119,13 +121,17 @@
         private function initConfigComments(): void
         {
             $filePath = $this->getDataFolder() . "config.yml";
-            $search = [
+            /*$search = [
                 "{file-description}",
                 "{version-description1}",
                 "{version-description2}",
                 "{language-description1}",
                 "{language-description2}",
                 "{language-description3}",
+                "{cleanup-description1}",
+                "{cleanup-description2}",
+                "{cleanup-description3}",
+                "{cleanup-description4}",
             ];
             $replace = [
                 $this->lang->translateString("file.description"),
@@ -134,8 +140,26 @@
                 $this->lang->translateString("language.description1"),
                 $this->lang->translateString("language.description2"),
                 $this->lang->translateString("language.description3"),
-            ];
-            file_put_contents($filePath, str_replace($search, $replace, file_get_contents($filePath)));
+                $this->lang->translateString("cleanup.description1"),
+                $this->lang->translateString("cleanup.description2"),
+                $this->lang->translateString("cleanup.description3"),
+                $this->lang->translateString("cleanup.description4"),
+            ];*/
+            $file = file_get_contents($filePath);
+            //preg_match_all('#(?<={).*?(?=})#', $file, $matches);
+            preg_match_all('{{(.*)}}', $file, $matches);
+            //print_r($matches);
+            $search = [];
+            foreach ($matches[0] as $match) {
+                $search[] = $match;
+            }
+            //print_r($search);
+            $replace = [];
+            foreach ($search as $code) {
+                $code = str_replace(["-", "{", "}"], [".", "", ""], $code);
+                $replace[] = $this->lang->translateString($code);
+            }
+            file_put_contents($filePath, str_replace($search, $replace, $file));
         }
     
         private function initLanguage(): void

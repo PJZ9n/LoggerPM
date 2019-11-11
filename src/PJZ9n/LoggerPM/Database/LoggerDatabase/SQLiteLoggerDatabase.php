@@ -86,6 +86,7 @@
             $converted = [];
             foreach ($logs as $index => $log) {
                 $log["action_data"] = $log["action_data"] !== null ? json_decode($log["action_data"], true) : null;
+                $log["action_cancelled"] = $log["action_cancelled"] !== null ? boolval($log["action_cancelled"]) : null;
                 $log["created_at"] = DateTime::getUnixTimeByDateTime($log["created_at"]);
                 $converted[$index] = $log;
             }
@@ -110,7 +111,7 @@
             $this->getSqlite3()->exec($sql);
         }
     
-        public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null): void
+        public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null, ?int $createdAt = null): void
         {
             $sql = /** @lang SQLite */
                 <<< SQL
@@ -118,12 +119,14 @@
                     player_name,
                     action_type,
                     action_data,
-                    action_cancelled
+                    action_cancelled,
+                    created_at
                 ) VALUES (
                     :player_name,
                     :action_type,
                     :action_data,
-                    :action_cancelled
+                    :action_cancelled,
+                    :created_at
                 )
             SQL;
     
@@ -136,6 +139,9 @@
             $actionCancelled === null ?
                 $stmt->bindValue(":action_cancelled", null, SQLITE3_NULL) :
                 $stmt->bindValue(":action_cancelled", $actionCancelled, SQLITE3_INTEGER);
+            $createdAt === null ?
+                $stmt->bindValue(":created_at", null, SQLITE3_NULL) :
+                $stmt->bindValue(":created_at", DateTime::getDateTimeByUnixTime($createdAt), SQLITE3_TEXT);
             $stmt->execute();
             $stmt->close();
         }

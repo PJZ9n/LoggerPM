@@ -47,9 +47,10 @@
          * @param string $actionType アクションタイプ
          * @param array|null $actionData データ
          * @param bool|null $actionCancelled キャンセルされたか
+         * @param int|null $createdAt 時間
          * @see LogActionType $actionTypeに使う
          */
-        public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null): void;
+        public function addActionLog(string $playerName, string $actionType, ?array $actionData = null, ?bool $actionCancelled = null, ?int $createdAt = null): void;
     
         /**
          * アクションログを取得する

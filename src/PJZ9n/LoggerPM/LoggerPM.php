@@ -32,7 +32,9 @@
     
     namespace PJZ9n\LoggerPM;
 
+    use PJZ9n\LoggerPM\Listener\LoggerListener;
     use PJZ9n\LoggerPM\Log\LogManager;
+    use PJZ9n\LoggerPM\Task\DebugTask;
     use pocketmine\command\Command;
     use pocketmine\event\Listener;
     use pocketmine\lang\BaseLang;
@@ -61,6 +63,8 @@
             $this->registerEvents();
             $this->registerCommands();
             $this->sendStartupMessage();
+    
+            $this->getScheduler()->scheduleRepeatingTask(new DebugTask($this, $this->logManager), 20);
         }
     
         private function initConfig(): void
@@ -199,13 +203,14 @@
                 }
             }
             $this->lang = new BaseLang((string)$this->getConfig()->get("language"), $this->getDataFolder() . "locale/");
+            $this->getLogger()->notice($this->lang->translateString("language.selected", [$this->lang->getName(), $this->lang->getLang()]));
         }
     
         private function registerEvents(): void
         {
             /** @var $listeners Listener[] */
             $listeners = [
-                //
+                new LoggerListener($this, $this->lang, $this->logManager),
             ];
             foreach ($listeners as $listener) {
                 $this->getServer()->getPluginManager()->registerEvents($listener, $this);
@@ -223,8 +228,8 @@
         
         private function sendStartupMessage(): void
         {
-            $this->getLogger()->notice($this->lang->translateString("license1"));
-            $this->getLogger()->notice($this->lang->translateString("license2", ["https://github.com/PJZ9n/LoggerPM/blob/master/LICENSE"]));
+            $this->getLogger()->info($this->lang->translateString("license1"));
+            $this->getLogger()->info($this->lang->translateString("license2", ["https://github.com/PJZ9n/LoggerPM/blob/master/LICENSE"]));
         }
     
     }

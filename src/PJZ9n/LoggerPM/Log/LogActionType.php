@@ -55,9 +55,9 @@
         
         /** @var string プレイヤーチャット */
         public const LOG_TYPE_PLAYER_CHAT = "player-chat";
-        
-        /** @var string エンティティ攻撃 */
-        public const LOG_TYPE_ENTITY_ATTACK = "entity-attack";
+    
+        /** @var string プレイヤー攻撃 */
+        public const LOG_TYPE_PLAYER_ATTACK = "player-attack";
         
         /** @var string プレイヤーダメージ */
         public const LOG_TYPE_PLAYER_DAMAGE = "player-damage";

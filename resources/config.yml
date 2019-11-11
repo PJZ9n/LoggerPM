@@ -18,4 +18,8 @@ version: 1.0.0
 # {language-description3}
 language: {language}
 
-clean-up: {clean-up}
+# {cleanup-description1}
+# {cleanup-description2}
+# {cleanup-description3}
+# {cleanup-description4}
+cleanup: {cleanup}
